@@ -1,0 +1,12 @@
+{
+  "name": "LumaUI",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "LumaUI": {
+        "$path": "src"
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# Roblox build artifacts
+*.rbxm
+*.rbxmx
+*.rbxl
+*.rbxlx
+
+# Local tooling
+node_modules/
+.vscode/
+wally.lock
+
+# Generated test / coverage output
+coverage/
+TestResults/

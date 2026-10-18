@@ -16,6 +16,7 @@ export type WindowOptions = {
 	Position: UDim2?,
 	Player: Player?,
 	Parent: PlayerGui?,
+	ShowKeyHint: boolean?,
 }
 
 export type ControlOptions = {

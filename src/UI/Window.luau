@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 
+local Console = require(script.Parent.Console)
 local Maid = require(script.Parent.Parent.Core.Maid)
 local Theme = require(script.Parent.Parent.Core.Theme)
 local Util = require(script.Parent.Parent.Core.Util)
@@ -11,6 +12,7 @@ local Tab = require(script.Parent.Tab)
 
 local Window = {}
 Window.__index = Window
+Window.Version = "1.1.0"
 
 local function resolveKeyCode(value: any): EnumItem
 	if typeof(value) == "EnumItem" and value.EnumType == Enum.KeyCode then
@@ -184,7 +186,47 @@ function Window.new(options: any?): any
 	self._gui = gui
 
 	local rootSize = if typeof(data.Size) == "UDim2" then data.Size else UDim2.new(0.82, 0, 0.78, 0)
-	local root = Util.new("Frame", {
+	local root: Frame
+
+	-- Soft drop shadow built with two stacked frames (Roblox has no blur).
+	local shadowOuter = Util.new("Frame", {
+		Name = "ShadowOuter",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = if typeof(data.Position) == "UDim2" then data.Position else UDim2.fromScale(0.5, 0.5),
+		Size = rootSize,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.86,
+		BorderSizePixel = 0,
+		Active = false,
+		ZIndex = 0,
+	}, gui) :: Frame
+	Util.corner(shadowOuter, 20)
+	local shadowInner = Util.new("Frame", {
+		Name = "ShadowInner",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = if typeof(data.Position) == "UDim2" then data.Position else UDim2.fromScale(0.5, 0.5),
+		Size = rootSize,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.6,
+		BorderSizePixel = 0,
+		Active = false,
+		ZIndex = 0,
+	}, gui) :: Frame
+	Util.corner(shadowInner, 16)
+
+	local function syncShadow()
+		local position = root.Position
+		local size = root.Size
+		shadowOuter.Position = UDim2.new(position.X.Scale, position.X.Offset, position.Y.Scale, position.Y.Offset + 12)
+		shadowOuter.Size = UDim2.new(size.X.Scale, size.X.Offset + 30, size.Y.Scale, size.Y.Offset + 30)
+		shadowInner.Position = UDim2.new(position.X.Scale, position.X.Offset, position.Y.Scale, position.Y.Offset + 6)
+		shadowInner.Size = UDim2.new(size.X.Scale, size.X.Offset + 14, size.Y.Scale, size.Y.Offset + 14)
+	end
+
+	self._syncShadow = function()
+		syncShadow()
+	end
+	root = Util.new("Frame", {
 		Name = "Window",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = if typeof(data.Position) == "UDim2" then data.Position else UDim2.fromScale(0.5, 0.5),
@@ -193,9 +235,11 @@ function Window.new(options: any?): any
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 		Active = true,
+		ZIndex = 1,
 	}, gui) :: Frame
 	self._root = root
 	self._expandedSize = rootSize
+	syncShadow()
 	local rootCorner = Util.corner(root, theme.Radius)
 	Util.bindTheme(self, rootCorner, "CornerRadius", "Radius", function(radius: number)
 		return UDim.new(0, radius)
@@ -235,6 +279,26 @@ function Window.new(options: any?): any
 	}, root) :: Frame
 	self._header = header
 	Util.bindTheme(self, header, "BackgroundColor3", "Surface")
+	local headerGradient = Util.new("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, theme.Accent),
+			ColorSequenceKeypoint.new(0.45, theme.Surface),
+			ColorSequenceKeypoint.new(1, theme.Surface),
+		}),
+		Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.82),
+			NumberSequenceKeypoint.new(0.35, 1),
+			NumberSequenceKeypoint.new(1, 1),
+		}),
+		Rotation = 0,
+	}, header)
+	Util.bindTheme(self, headerGradient, "Color", "Accent", function(accent: Color3): ColorSequence
+		return ColorSequence.new({
+			ColorSequenceKeypoint.new(0, accent),
+			ColorSequenceKeypoint.new(0.45, self._theme.Surface),
+			ColorSequenceKeypoint.new(1, self._theme.Surface),
+		})
+	end)
 
 	local logo = Util.new("Frame", {
 		Name = "Logo",
@@ -245,31 +309,61 @@ function Window.new(options: any?): any
 	}, header) :: Frame
 	Util.corner(logo, 9)
 	Util.bindTheme(self, logo, "BackgroundColor3", "Accent")
-	Util.new("TextLabel", {
-	Name = "Mark",
-	BackgroundTransparency = 1,
-	Size = UDim2.fromScale(1, 1),
-	Font = Enum.Font.GothamBold,
-	Text = "L",
-	TextColor3 = Color3.new(1, 1, 1),
-	TextSize = 17,
-	TextXAlignment = Enum.TextXAlignment.Center,
-}, logo)
+	Util.new("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, theme.Accent),
+			ColorSequenceKeypoint.new(1, theme.AccentMuted),
+		}),
+		Rotation = 45,
+	}, logo)
+	local logoMark = Util.new("TextLabel", {
+		Name = "Mark",
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 1),
+		Font = Enum.Font.GothamBold,
+		Text = "L",
+		TextColor3 = theme.AccentText,
+		TextSize = 17,
+		TextXAlignment = Enum.TextXAlignment.Center,
+	}, logo)
+	Util.bindTheme(self, logoMark, "TextColor3", "AccentText")
 
 	textLabel(header, self, "Title", tostring(data.Title or "Luma UI"), {
 		Position = UDim2.new(0, 56, 0, 7),
-		Size = UDim2.new(1, -150, 0, 22),
+		Size = UDim2.new(1, -230, 0, 22),
 		Font = Enum.Font.GothamBold,
 		TextSize = 15,
 	})
 	local subtitle = textLabel(header, self, "Subtitle", tostring(data.Subtitle or "A polished toolkit for Roblox"), {
 		Position = UDim2.new(0, 57, 0, 30),
-		Size = UDim2.new(1, -150, 0, 17),
+		Size = UDim2.new(1, -230, 0, 17),
 		Font = Enum.Font.Gotham,
 		TextColor3 = theme.MutedText,
 		TextSize = 11,
 	})
 	Util.bindTheme(self, subtitle, "TextColor3", "MutedText")
+
+	-- Shortcut hint showing which key toggles the window.
+	local keyHint: TextLabel? = nil
+	if data.ShowKeyHint ~= false and self._toggleKey ~= Enum.KeyCode.None then
+		keyHint = Util.new("TextLabel", {
+			Name = "KeyHint",
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.new(1, -90, 0, 18),
+			Size = UDim2.fromOffset(0, 20),
+			AutomaticSize = Enum.AutomaticSize.X,
+			BackgroundColor3 = theme.SurfaceAlt,
+			BackgroundTransparency = 0.15,
+			BorderSizePixel = 0,
+			Font = Enum.Font.GothamMedium,
+			Text = "  " .. self._toggleKey.Name .. "  ",
+			TextColor3 = theme.SubtleText,
+			TextSize = 9,
+		}, header) :: TextLabel
+		Util.corner(keyHint, 6)
+		Util.bindTheme(self, keyHint, "BackgroundColor3", "SurfaceAlt")
+		Util.bindTheme(self, keyHint, "TextColor3", "SubtleText")
+	end
 
 	local minimizeButton = Util.new("TextButton", {
 		Name = "Minimize",
@@ -394,6 +488,20 @@ function Window.new(options: any?): any
 	self._searchInput = searchInput
 	Util.bindTheme(self, searchInput, "TextColor3", "Text")
 	Util.bindTheme(self, searchInput, "PlaceholderColor3", "SubtleText")
+	local searchHint = Util.new("TextLabel", {
+		Name = "SearchHint",
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -7, 0.5, 0),
+		Size = UDim2.fromOffset(34, 16),
+		BackgroundTransparency = 1,
+		Font = Enum.Font.GothamBold,
+		Text = "Ctrl K",
+		TextColor3 = theme.SubtleText,
+		TextSize = 8,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Active = false,
+	}, searchFrame) :: TextLabel
+	Util.bindTheme(self, searchHint, "TextColor3", "SubtleText")
 
 	local tabList = Util.new("ScrollingFrame", {
 		Name = "Tabs",
@@ -420,7 +528,7 @@ function Window.new(options: any?): any
 		Size = UDim2.new(1, -24, 0, 12),
 		BackgroundTransparency = 1,
 		Font = Enum.Font.GothamBold,
-		Text = "LUMAUI  •  CLIENT",
+		Text = ("LUMAUI  •  v%s"):format(Window.Version),
 		TextColor3 = theme.SubtleText,
 		TextSize = 8,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -436,6 +544,65 @@ function Window.new(options: any?): any
 		ClipsDescendants = true,
 	}, body) :: Frame
 	self._pages = pages
+
+	-- Resize handle placed on the bottom-right corner of the window.
+	local resizeGrip = Util.new("TextButton", {
+		Name = "ResizeGrip",
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -1, 1, -1),
+		Size = UDim2.fromOffset(20, 20),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		AutoButtonColor = false,
+		Font = Enum.Font.GothamBold,
+		Text = "\u{25E2}",
+		TextColor3 = theme.SubtleText,
+		TextSize = 11,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		ZIndex = 5,
+	}, root) :: TextButton
+	Util.bindTheme(self, resizeGrip, "TextColor3", "SubtleText")
+	self._resizeGrip = resizeGrip
+
+	local resizing = false
+	local resizeInput: InputObject? = nil
+	local resizeStart = Vector2.zero
+	local resizeOrigin = UDim2.new()
+	self._maid:GiveTask(resizeGrip.InputBegan:Connect(function(input: InputObject)
+		if self._minimized then
+			return
+		end
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			resizing = true
+			resizeInput = input
+			resizeStart = Vector2.new(input.Position.X, input.Position.Y)
+			resizeOrigin = root.Size
+		end
+	end))
+	self._maid:GiveTask(UserInputService.InputChanged:Connect(function(input: InputObject)
+		if not resizing then
+			return
+		end
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input == resizeInput then
+			local delta = Vector2.new(input.Position.X, input.Position.Y) - resizeStart
+			local size = UDim2.new(
+				resizeOrigin.X.Scale,
+				math.max(resizeOrigin.X.Offset + delta.X, 420),
+				resizeOrigin.Y.Scale,
+				math.max(resizeOrigin.Y.Offset + delta.Y, 300)
+			)
+			root.Size = size
+			self._expandedSize = size
+			syncShadow()
+		end
+	end))
+	self._maid:GiveTask(UserInputService.InputEnded:Connect(function(input: InputObject)
+		if input == resizeInput or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			resizing = false
+			resizeInput = nil
+		end
+	end))
 
 	self._maid:GiveTask(searchInput:GetPropertyChangedSignal("Text"):Connect(function()
 		if not self._destroyed then
@@ -499,6 +666,7 @@ function Window.new(options: any?): any
 				startPosition.Y.Scale,
 				startPosition.Y.Offset + delta.Y
 			)
+			syncShadow()
 		end
 	end))
 	self._maid:GiveTask(UserInputService.InputEnded:Connect(function(input: InputObject)
@@ -556,6 +724,13 @@ function Window.Tab(self: any, options: any): any
 	return Tab.new(self, options)
 end
 
+function Window.Console(self: any, options: any?): any
+	if self._destroyed then
+		return nil
+	end
+	return Console.new(self, options)
+end
+
 function Window.SelectTab(self: any, tab: any)
 	if self._destroyed or tab == nil or tab._destroyed then
 		return
@@ -607,6 +782,11 @@ function Window.Minimize(self: any, minimized: boolean?)
 	else
 		self._root.Size = targetSize
 	end
+	task.delay(self._animationDuration, function()
+		if not self._destroyed then
+			self._syncShadow()
+		end
+	end)
 end
 
 function Window.SetTheme(self: any, newTheme: any)
@@ -722,6 +902,7 @@ function Window.Notify(self: any, rawOptions: any): Frame?
 
 	local kind = string.lower(tostring(options.Type or "info"))
 	local accentKey = if kind == "success" then "Success" else if kind == "warning" then "Warning" else if kind == "error" or kind == "danger" then "Danger" else "Accent"
+	local glyph = if kind == "success" then "\u{2713}" else if kind == "warning" then "!" else if kind == "error" or kind == "danger" then "\u{2715}" else "i"
 	local card = Util.new("Frame", {
 		Name = "Notification_" .. tostring(self._nextNotificationId),
 		BackgroundColor3 = self._theme.Surface,
@@ -747,10 +928,35 @@ function Window.Notify(self: any, rawOptions: any): Frame?
 	Util.corner(stripe, 2)
 	Util.bindTheme(self, stripe, "BackgroundColor3", accentKey)
 
+	local badge = Util.new("Frame", {
+		Name = "Badge",
+		Position = UDim2.new(0, 12, 0, 10),
+		Size = UDim2.fromOffset(20, 20),
+		BackgroundColor3 = self._theme[accentKey],
+		BackgroundTransparency = if self._animationDuration > 0 then 1 else 0.82,
+		BorderSizePixel = 0,
+		ZIndex = 21,
+	}, card) :: Frame
+	Util.corner(badge, 10)
+	Util.bindTheme(self, badge, "BackgroundColor3", accentKey)
+	local badgeLabel = Util.new("TextLabel", {
+		Name = "Glyph",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		Font = Enum.Font.GothamBold,
+		Text = glyph,
+		TextColor3 = self._theme[accentKey],
+		TextSize = 11,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		ZIndex = 22,
+	}, badge) :: TextLabel
+	Util.bindTheme(self, badgeLabel, "TextColor3", accentKey)
+
 	local title = Util.new("TextLabel", {
 		Name = "Title",
-		Position = UDim2.new(0, 14, 0, 10),
-		Size = UDim2.new(1, -52, 0, 18),
+		Position = UDim2.new(0, 40, 0, 10),
+		Size = UDim2.new(1, -78, 0, 18),
 		BackgroundTransparency = 1,
 		Font = Enum.Font.GothamBold,
 		Text = tostring(options.Title or "Notification"),
@@ -780,8 +986,8 @@ function Window.Notify(self: any, rawOptions: any): Frame?
 	if options.Description ~= nil then
 		local description = Util.new("TextLabel", {
 			Name = "Description",
-			Position = UDim2.new(0, 14, 0, 31),
-			Size = UDim2.new(1, -26, 0, 32),
+			Position = UDim2.new(0, 40, 0, 31),
+			Size = UDim2.new(1, -52, 0, 32),
 			BackgroundTransparency = 1,
 			Font = Enum.Font.Gotham,
 			Text = tostring(options.Description),
@@ -834,6 +1040,7 @@ function Window.Notify(self: any, rawOptions: any): Frame?
 		Util.tween(card, self._animationDuration, { BackgroundTransparency = 0 })
 		Util.tween(cardStroke, self._animationDuration, { Transparency = 0.45 })
 		Util.tween(stripe, self._animationDuration, { BackgroundTransparency = 0 })
+		Util.tween(badge, self._animationDuration, { BackgroundTransparency = 0.82 })
 	end
 	if duration > 0 then
 		Util.tween(progress, duration, { Size = UDim2.new(0, 0, 0, 2) }, Enum.EasingStyle.Linear)

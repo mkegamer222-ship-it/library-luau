@@ -121,6 +121,16 @@
     .brand { min-width: 0; flex: 1; }
     .brand-title { margin: 0; font-size: 14px; line-height: 20px; font-weight: 750; letter-spacing: -.02em; }
     .brand-subtitle { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 16px; }
+    .key-hint {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 8px; border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      border-radius: 7px; background: var(--surface-alt); color: var(--muted);
+      font-size: 9px; font-weight: 700; letter-spacing: .04em; white-space: nowrap;
+    }
+    .key-hint kbd {
+      padding: 2px 5px; border-radius: 4px; background: var(--surface-raised);
+      color: var(--text); font: 8.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
     .header-actions { display: flex; gap: 8px; }
     .window-action {
       width: 30px; height: 30px; display: grid; place-items: center;
@@ -221,7 +231,9 @@
       box-shadow: 0 8px 24px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.018);
     }
     .section + .section { margin-top: 12px; }
-    .section-title { margin: 0 0 11px 1px; font-size: 13px; font-weight: 730; letter-spacing: -.01em; }
+    .section-heading { display: flex; align-items: center; gap: 8px; margin: 0 0 11px 1px; }
+    .section-bar { width: 3px; height: 13px; flex: 0 0 3px; border-radius: 2px; background: var(--accent); }
+    .section-title { margin: 0; font-size: 13px; font-weight: 730; letter-spacing: -.01em; }
     .section-subtitle { margin: -5px 1px 13px; color: var(--muted); font-size: 11px; line-height: 1.5; }
     .controls { display: grid; gap: 8px; }
 
@@ -255,7 +267,11 @@
 
     .slider-control { padding: 8px 12px 10px; }
     .slider-head { display: flex; align-items: center; justify-content: space-between; margin: 0 1px 9px; }
-    .slider-value { color: var(--accent); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .slider-value {
+      padding: 2px 8px; border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+      border-radius: 999px; background: var(--accent-muted); color: var(--accent);
+      font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums;
+    }
     input[type="range"] { width: 100%; height: 7px; margin: 0; appearance: none; border-radius: 9px; background: var(--surface-raised); cursor: pointer; }
     input[type="range"]::-webkit-slider-thumb { width: 14px; height: 14px; appearance: none; border: 2px solid var(--accent); border-radius: 50%; background: var(--text); box-shadow: 0 0 0 2px var(--surface-alt); }
     input[type="range"]::-moz-range-thumb { width: 11px; height: 11px; border: 2px solid var(--accent); border-radius: 50%; background: var(--text); }
@@ -315,7 +331,7 @@
     .feature strong { display: block; font-size: 10.5px; }
     .feature small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.45; }
 
-    .theme-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .theme-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     .theme-choice {
       display: flex; flex-direction: column; align-items: flex-start;
       padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-alt); text-align: left; cursor: pointer; transition: .15s ease;
@@ -336,9 +352,56 @@
       background: var(--surface); box-shadow: 0 12px 40px rgba(0,0,0,.35); animation: toast-in .2s ease; pointer-events: auto;
     }
     .toast.warning { border-left-color: var(--warning); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.info { border-left-color: var(--accent); }
+    .toast-badge {
+      width: 22px; height: 22px; flex: 0 0 22px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--accent-muted); color: var(--accent);
+      font-size: 11px; font-weight: 800;
+    }
+    .toast.success .toast-badge { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); }
+    .toast.warning .toast-badge { background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); }
+    .toast.error .toast-badge { background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
+    .toast-body { display: flex; align-items: flex-start; gap: 10px; }
     .toast-title { font-size: 11px; font-weight: 700; }
     .toast-copy { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.4; }
     @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .console-editor {
+      width: 100%; min-height: 118px; resize: vertical; padding: 10px 11px;
+      border: 1px solid color-mix(in srgb, var(--border) 70%, transparent); border-radius: 8px;
+      outline: none; color: var(--text); background: var(--background);
+      font: 11px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .console-editor:focus { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent); }
+    .console-actions { display: flex; gap: 8px; margin-top: 9px; }
+    .console-button {
+      min-height: 32px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+      border-radius: 8px; background: var(--surface-alt); color: var(--text);
+      font-size: 11px; font-weight: 600; cursor: pointer; transition: .15s ease;
+    }
+    .console-button:hover { border-color: var(--accent); background: var(--surface-raised); }
+    .console-button.primary { border-color: transparent; background: var(--accent); color: #fff; }
+    .console-button.primary:hover { filter: brightness(1.08); }
+    .console-log {
+      max-height: 150px; overflow: auto; margin-top: 9px; padding: 9px 10px;
+      border: 1px solid color-mix(in srgb, var(--border) 60%, transparent); border-radius: 8px;
+      background: var(--background); color: var(--muted);
+      font: 10.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap;
+    }
+    .console-log .ok { color: var(--success); }
+    .console-log .bad { color: var(--danger); }
+    .console-log .echo { color: var(--text); }
+
+    .resize-grip {
+      position: absolute; right: 3px; bottom: 3px; z-index: 6;
+      width: 18px; height: 18px; display: grid; place-items: center;
+      color: var(--subtle); font-size: 10px; cursor: nwse-resize; user-select: none;
+    }
+    .window-footer {
+      flex: 0 0 22px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px; border-top: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+      color: var(--subtle); font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+    }
     .reopen {
       display: none; margin: 18px auto 0; padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px;
       color: var(--text); background: var(--surface); cursor: pointer;
@@ -362,6 +425,18 @@
       --background: #09101c; --surface: #0d1829; --surface-alt: #132238; --surface-raised: #1a2d48;
       --border: #27405d; --accent: #3ac3db; --accent-muted: #184f5e; --text: #ebf6fb;
       --muted: #96b1c1; --subtle: #668599; --success: #53d5a1; --warning: #f8c25e; --danger: #f46f7f;
+    }
+    .theme-nord {
+      color-scheme: dark;
+      --background: #2e3440; --surface: #3b4252; --surface-alt: #434c5e; --surface-raised: #4c566a;
+      --border: #5b6577; --accent: #88c0d0; --accent-muted: #4c566a; --text: #eceff4;
+      --muted: #b8c1d1; --subtle: #8f99ad; --success: #a3be8c; --warning: #ebcb8b; --danger: #bf616a;
+    }
+    .theme-amoled {
+      color-scheme: dark;
+      --background: #000000; --surface: #07070a; --surface-alt: #0d0d12; --surface-raised: #14141b;
+      --border: #23232d; --accent: #b28dff; --accent-muted: #2a2140; --text: #f7f7fb;
+      --muted: #9a9aa8; --subtle: #6c6c78; --success: #4ade80; --warning: #fbbf24; --danger: #f87171;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -416,6 +491,7 @@
           <h1 class="brand-title">LumaUI</h1>
           <p class="brand-subtitle">Exemplo de componentes e temas</p>
         </div>
+        <div class="key-hint" title="Atalho global para mostrar ou ocultar a janela"><kbd>Right Shift</kbd></div>
         <div class="header-actions">
           <button class="window-action" id="minimize" aria-label="Minimizar" title="Minimizar">−</button>
           <button class="window-action close" id="close" aria-label="Fechar" title="Fechar">×</button>
@@ -435,15 +511,16 @@
             <button class="tab-button active" data-tab="controls"><span class="tab-icon">02</span><span class="tab-text">Controles</span></button>
             <button class="tab-button" data-tab="appearance"><span class="tab-icon">03</span><span class="tab-text">Aparência</span></button>
             <button class="tab-button" data-tab="config"><span class="tab-icon">04</span><span class="tab-text">Configuração</span></button>
+            <button class="tab-button" data-tab="console"><span class="tab-icon">05</span><span class="tab-text">Console</span></button>
           </nav>
-          <div class="sidebar-footer"><span><i></i> CLIENT</span><span>v1.0.0</span></div>
+          <div class="sidebar-footer"><span><i></i> CLIENT</span><span>v1.1.0</span></div>
         </aside>
 
         <div class="pages">
           <section class="page" data-page="home">
             <div class="page-heading"><span class="page-mark">01</span><div><h2>Início</h2><p>Visão geral do seu painel</p></div></div>
             <div class="section">
-              <h2 class="section-title">Visão geral</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Visão geral</h2></div>
               <div class="welcome-card">
                 <div class="welcome-kicker">Biblioteca de interface · Roblox Luau</div>
                 <h3 class="welcome-title">Bem-vindo à LumaUI</h3>
@@ -463,7 +540,7 @@
           <section class="page active" id="controls" data-page="controls">
             <div class="page-heading"><span class="page-mark">02</span><div><h2>Controles</h2><p>Ajuste preferências, atalhos e valores</p></div></div>
             <div class="section">
-              <h2 class="section-title">Interação</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Interação</h2></div>
               <div class="controls">
                 <div class="control control-row tall" data-search="notificações ativa notificações locais">
                   <div class="control-copy"><span class="control-title">Notificações</span><span class="control-description">Ativa notificações locais neste exemplo.</span></div>
@@ -525,16 +602,18 @@
           <section class="page" data-page="appearance">
             <div class="page-heading"><span class="page-mark">03</span><div><h2>Aparência</h2><p>Personalize as cores e a busca</p></div></div>
             <div class="section">
-              <h2 class="section-title">Temas</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Temas</h2></div>
               <p class="section-subtitle">Altere a paleta da interface em tempo real.</p>
               <div class="theme-options">
                 <button class="theme-choice selected" data-theme="dark"><span class="swatches"><i style="background:#0c0e14"></i><i style="background:#202634"></i><i style="background:#7970ff"></i></span><strong>Dark</strong><small>Grafite · violeta</small></button>
                 <button class="theme-choice" data-theme="light"><span class="swatches"><i style="background:#f2f4f9"></i><i style="background:#fff"></i><i style="background:#664de1"></i></span><strong>Light</strong><small>Claro · suave</small></button>
                 <button class="theme-choice" data-theme="midnight"><span class="swatches"><i style="background:#09101c"></i><i style="background:#132238"></i><i style="background:#3ac3db"></i></span><strong>Midnight</strong><small>Noturno · ciano</small></button>
+                <button class="theme-choice" data-theme="nord"><span class="swatches"><i style="background:#2e3440"></i><i style="background:#434c5e"></i><i style="background:#88c0d0"></i></span><strong>Nord</strong><small>Névoa · gelo</small></button>
+                <button class="theme-choice" data-theme="amoled"><span class="swatches"><i style="background:#000"></i><i style="background:#0d0d12"></i><i style="background:#b28dff"></i></span><strong>Amoled</strong><small>Preto puro · violeta</small></button>
               </div>
             </div>
             <div class="section">
-              <h2 class="section-title">Busca de controles</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Busca de controles</h2></div>
               <p class="section-subtitle">A API <code>Window:Search(text)</code> filtra os controles pelo texto.</p>
               <div class="controls">
                 <button class="action-button" id="search-volume"><strong>Buscar controles</strong><span>Filtrar por “volume”.</span></button>
@@ -542,7 +621,7 @@
               </div>
             </div>
             <div class="section">
-              <h2 class="section-title">Cor de destaque</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Cor de destaque</h2></div>
               <div class="control control-row">
                 <div class="control-copy"><span class="control-title">Accent personalizado</span><span class="control-description">Experimente uma cor para a janela.</span></div>
                 <div class="color-control"><span class="color-value" id="theme-color-value">#7970FF</span><input type="color" id="theme-accent-picker" value="#7970ff" aria-label="Accent personalizado"></div>
@@ -550,10 +629,31 @@
             </div>
           </section>
 
+          <section class="page" data-page="console">
+            <div class="page-heading"><span class="page-mark">05</span><div><h2>Console</h2><p>Execute snippets de Luau no cliente</p></div></div>
+            <div class="section">
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Editor</h2></div>
+              <p class="section-subtitle">Use <code>Ctrl + Enter</code> para executar. O código roda na VM Luau da própria biblioteca.</p>
+              <textarea class="console-editor" id="console-editor" spellcheck="false">return 21 * 2</textarea>
+              <div class="console-actions">
+                <button class="console-button primary" id="console-run">Executar</button>
+                <button class="console-button" id="console-clear">Limpar</button>
+              </div>
+              <pre class="console-log" id="console-log"></pre>
+            </div>
+            <div class="section">
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">loadstring</h2></div>
+              <p class="section-subtitle">A API <code>LumaUI.loadstring(codigo)</code> devolve <code>ok, valor, erro</code> e nunca lança erros na tela.</p>
+              <div class="controls">
+                <button class="action-button" id="console-api"><strong>Executar via API</strong><span>Chama LumaUI.loadstring e mostra o retorno.</span></button>
+              </div>
+            </div>
+          </section>
+
           <section class="page" data-page="config">
             <div class="page-heading"><span class="page-mark">04</span><div><h2>Configuração</h2><p>Importe e exporte suas preferências</p></div></div>
             <div class="section">
-              <h2 class="section-title">Importar e exportar</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Importar e exportar</h2></div>
               <p class="section-subtitle">A biblioteca gera JSON; o armazenamento fica a cargo do jogo.</p>
               <div class="controls">
                 <button class="action-button" id="export-config"><strong>Exportar configuração</strong><span>Crie uma string JSON com os valores atuais.</span></button>
@@ -562,7 +662,7 @@
               <pre class="json-output" id="json-output"></pre>
             </div>
             <div class="section">
-              <h2 class="section-title">Gerenciamento</h2>
+              <div class="section-heading"><span class="section-bar"></span><h2 class="section-title">Gerenciamento</h2></div>
               <div class="controls">
                 <button class="action-button" data-toast="success" data-title="Janela visível" data-copy="A interface continua aberta para você explorar."><strong>Alternar janela</strong><span>Use também Right Shift para ocultar/mostrar.</span></button>
               </div>
@@ -570,6 +670,8 @@
           </section>
         </div>
       </div>
+      <div class="window-footer"><span>LUMAUI</span><span>V1.1.0</span></div>
+      <div class="resize-grip" aria-hidden="true">◢</div>
     </section>
     <button class="reopen" id="reopen">Reabrir pré-visualização</button>
   </main>
@@ -591,6 +693,8 @@
       dark: { name: 'Dark', bg: '#0c0e14', surface: '#11141c', alt: '#181c27', raised: '#202634', border: '#2e3646', accent: '#7970ff', mutedAccent: '#302d5b', text: '#f3f5fa', muted: '#a0a8b7', subtle: '#707b90', success: '#4dcd93', warning: '#f7be53', danger: '#f06774' },
       light: { name: 'Light', bg: '#f2f4f9', surface: '#ffffff', alt: '#f6f7fb', raised: '#ebedf4', border: '#dcdfe9', accent: '#664de1', mutedAccent: '#e3ddff', text: '#222531', muted: '#616779', subtle: '#898f9e', success: '#229b67', warning: '#c38113', danger: '#cd4251' },
       midnight: { name: 'Midnight', bg: '#09101c', surface: '#0d1829', alt: '#132238', raised: '#1a2d48', border: '#27405d', accent: '#3ac3db', mutedAccent: '#184f5e', text: '#ebf6fb', muted: '#96b1c1', subtle: '#668599', success: '#53d5a1', warning: '#f8c25e', danger: '#f46f7f' },
+      nord: { name: 'Nord', bg: '#2e3440', surface: '#3b4252', alt: '#434c5e', raised: '#4c566a', border: '#5b6577', accent: '#88c0d0', mutedAccent: '#4c566a', text: '#eceff4', muted: '#b8c1d1', subtle: '#8f99ad', success: '#a3be8c', warning: '#ebcb8b', danger: '#bf616a' },
+      amoled: { name: 'Amoled', bg: '#000000', surface: '#07070a', alt: '#0d0d12', raised: '#14141b', border: '#23232d', accent: '#b28dff', mutedAccent: '#2a2140', text: '#f7f7fb', muted: '#9a9aa8', subtle: '#6c6c78', success: '#4ade80', warning: '#fbbf24', danger: '#f87171' },
     };
 
     function selectTab(name) {
@@ -601,8 +705,10 @@
 
     function notify(title, copy, type = 'success') {
       const toast = document.createElement('div');
-      toast.className = `toast ${type === 'warning' ? 'warning' : ''}`;
-      toast.innerHTML = `<div class="toast-title"></div><div class="toast-copy"></div>`;
+      const glyph = type === 'success' ? '✓' : type === 'warning' ? '!' : type === 'error' ? '✕' : 'i';
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<div class="toast-body"><span class="toast-badge"></span><div><div class="toast-title"></div><div class="toast-copy"></div></div></div>`;
+      toast.querySelector('.toast-badge').textContent = glyph;
       toast.querySelector('.toast-title').textContent = title;
       toast.querySelector('.toast-copy').textContent = copy;
       toastHost.append(toast);
@@ -688,7 +794,7 @@
     function setTheme(name) {
       const palette = themes[name];
       if (!palette) return;
-      windowEl.classList.remove('theme-dark', 'theme-light', 'theme-midnight');
+      windowEl.classList.remove('theme-dark', 'theme-light', 'theme-midnight', 'theme-nord', 'theme-amoled');
       windowEl.classList.add(`theme-${name}`);
       document.querySelectorAll('.theme-choice').forEach(choice => choice.classList.toggle('selected', choice.dataset.theme === name));
       document.getElementById('theme-accent-picker').value = palette.accent;
@@ -767,6 +873,114 @@
       setProgress(values.loading_progress);
       notify('Config importada', 'Os valores da última exportação foram restaurados.');
     });
+
+    /* ---------------------------------------------------------- console (mini VM) */
+    const consoleEditor = document.getElementById('console-editor');
+    const consoleLog = document.getElementById('console-log');
+
+    function logConsole(text, kind = '') {
+      const line = document.createElement('span');
+      line.className = kind;
+      line.textContent = `${text}\n`;
+      consoleLog.append(line);
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+    }
+
+    // Interpretador mínimo: `return <expressão>` com aritmética e `print(...)`.
+    function evaluateLuau(source) {
+      const code = source.trim();
+      if (!code) throw new Error('Nada para executar.');
+      const printMatch = code.match(/^print\s*\((.*)\)$/);
+      if (printMatch) {
+        const parts = printMatch[1].split(',').map(part => part.trim());
+        return { printed: parts.map(part => {
+          const value = evaluateExpression(part);
+          return value === undefined ? 'nil' : String(value);
+        }).join(' ') };
+      }
+      const returnMatch = code.match(/^return\s+(.+)$/);
+      if (returnMatch) {
+        const value = evaluateExpression(returnMatch[1]);
+        return { value: value === undefined ? 'nil' : String(value) };
+      }
+      throw new Error('Sintaxe nao suportada nesta previa.');
+    }
+
+    function evaluateExpression(expression) {
+      const text = expression.trim();
+      if (/^-?\d+(\.\d+)?$/.test(text)) return Number(text);
+      if (!/^[-+*/%().\d\s]+$/.test(text)) throw new Error(`Operacao invalida: ${text}`);
+      const tokens = text.match(/\d+\.?\d*|[-+*/%()]/g) || [];
+      let index = 0;
+      const peek = () => tokens[index];
+      const eat = token => { if (peek() === token) { index += 1; return true; } return false; };
+
+      function parseExpression() {
+        let left = parseTerm();
+        while (peek() === '+' || peek() === '-') {
+          const operator = tokens[index++];
+          const right = parseTerm();
+          left = operator === '+' ? left + right : left - right;
+        }
+        return left;
+      }
+      function parseTerm() {
+        let left = parseFactor();
+        while (peek() === '*' || peek() === '/' || peek() === '%') {
+          const operator = tokens[index++];
+          const right = parseFactor();
+          if (operator === '*') left = left * right;
+          else if (operator === '/') left = right === 0 ? NaN : left / right;
+          else left = left % right;
+        }
+        return left;
+      }
+      function parseFactor() {
+        if (eat('(')) {
+          const value = parseExpression();
+          if (!eat(')')) throw new Error('Faltou ")"');
+          return value;
+        }
+        const token = tokens[index++];
+        if (token === undefined) throw new Error('Expressao incompleta.');
+        if (token === '-') return -parseFactor();
+        const value = Number(token);
+        if (Number.isNaN(value)) throw new Error(`Token invalido: ${token}`);
+        return value;
+      }
+
+      const result = parseExpression();
+      if (index < tokens.length) throw new Error('Expressao invalida.');
+      return result;
+    }
+
+    function runConsole() {
+      const code = consoleEditor.value;
+      if (!code.trim()) { logConsole('Nada para executar.', 'echo'); return; }
+      logConsole(`> ${code.trim()}`, 'echo');
+      try {
+        const result = evaluateLuau(code);
+        if (result.printed !== undefined) logConsole(result.printed, 'ok');
+        else logConsole(`= ${result.value}`, 'ok');
+      } catch (error) {
+        logConsole(`x ${error.message}`, 'bad');
+      }
+    }
+
+    document.getElementById('console-run').addEventListener('click', runConsole);
+    document.getElementById('console-clear').addEventListener('click', () => { consoleLog.textContent = ''; });
+    document.getElementById('console-api').addEventListener('click', () => {
+      consoleEditor.value = 'return 21 * 2';
+      runConsole();
+      notify('loadstring', 'A API LumaUI.loadstring devolve ok, valor, erro.', 'info');
+    });
+    consoleEditor.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        runConsole();
+      }
+    });
+    logConsole('Console pronta. Digite o codigo e pressione Executar.', 'echo');
 
     const header = document.getElementById('window-header');
     let dragState = null;

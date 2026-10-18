@@ -136,14 +136,44 @@ function Tab.new(window: any, options: any): any
 	Util.corner(indicator, 3)
 	Util.bindTheme(window, indicator, "BackgroundColor3", "Accent")
 
-	local labelText = if self._icon == "" then title else (self._icon .. "   " .. title)
+	local chip: Frame? = nil
+	local chipLabel: TextLabel? = nil
+	local labelOffset = 13
+	if self._icon ~= "" then
+		chip = Util.new("Frame", {
+			Name = "Icon",
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, 9, 0.5, 0),
+			Size = UDim2.fromOffset(22, 22),
+			BackgroundColor3 = window._theme.SurfaceAlt,
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+		}, button) :: Frame
+		Util.corner(chip, 6)
+		chipLabel = Util.new("TextLabel", {
+			Name = "Glyph",
+			Size = UDim2.fromScale(1, 1),
+			BackgroundTransparency = 1,
+			Font = Enum.Font.GothamBold,
+			Text = self._icon,
+			TextColor3 = window._theme.MutedText,
+			TextSize = 9,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextYAlignment = Enum.TextYAlignment.Center,
+		}, chip) :: TextLabel
+		Util.bindTheme(window, chipLabel, "TextColor3", "MutedText")
+		labelOffset = 38
+	end
+	self._chip = chip
+	self._chipLabel = chipLabel
+
 	local label = Util.new("TextLabel", {
 		Name = "Title",
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 13, 0, 0),
-		Size = UDim2.new(1, -20, 1, 0),
+		Position = UDim2.new(0, labelOffset, 0, 0),
+		Size = UDim2.new(1, -labelOffset - 7, 1, 0),
 		Font = Enum.Font.GothamMedium,
-		Text = labelText,
+		Text = title,
 		TextColor3 = window._theme.MutedText,
 		TextSize = 13,
 		TextTruncate = Enum.TextTruncate.AtEnd,
@@ -203,6 +233,13 @@ function Tab._refreshStyle(self: any)
 	self._buttonStroke.Transparency = if self._selected then 0.72 else 1
 	self._label.TextColor3 = if self._selected then theme.Accent else theme.MutedText
 	self._label.Font = if self._selected then Enum.Font.GothamBold else Enum.Font.GothamMedium
+	if self._chip ~= nil then
+		self._chip.BackgroundTransparency = if self._selected then 0 else 1
+		self._chip.BackgroundColor3 = if self._selected then theme.Surface else theme.SurfaceAlt
+	end
+	if self._chipLabel ~= nil then
+		self._chipLabel.TextColor3 = if self._selected then theme.Accent else theme.MutedText
+	end
 end
 
 function Tab.Select(self: any)

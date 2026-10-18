@@ -39,29 +39,72 @@ function Section.new(tab: any, options: any): any
 	Util.padding(frame, 12, 12, 12, 12)
 	Util.layout(frame, Enum.FillDirection.Vertical, 10)
 
-	local heading = Util.new("TextLabel", {
+	local headingFrame = Util.new("Frame", {
 		Name = "Heading",
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 0, if title == "" then 0 else 20),
-		AutomaticSize = Enum.AutomaticSize.None,
+		Visible = title ~= "",
+		LayoutOrder = 1,
+	}, frame)
+	local headingBar = Util.new("Frame", {
+		Name = "Accent",
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 1, 0.5, 0),
+		Size = UDim2.fromOffset(3, 13),
+		BackgroundColor3 = window._theme.Accent,
+		BorderSizePixel = 0,
+	}, headingFrame) :: Frame
+	Util.corner(headingBar, 2)
+	Util.bindTheme(window, headingBar, "BackgroundColor3", "Accent")
+
+	local heading = Util.new("TextLabel", {
+		Name = "Title",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 11, 0, 0),
+		Size = UDim2.new(1, -11, 1, 0),
 		Font = Enum.Font.GothamBold,
 		Text = title,
 		TextColor3 = window._theme.Text,
 		TextSize = 14,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
-		Visible = title ~= "",
-		LayoutOrder = 1,
-	}, frame)
+	}, headingFrame)
 	self._heading = heading
 	Util.bindTheme(window, heading, "TextColor3", "Text")
+
+	local descriptionText = tostring(options.Description or "")
+	if descriptionText ~= "" then
+		local descriptionHolder = Util.new("Frame", {
+			Name = "DescriptionHolder",
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			LayoutOrder = 2,
+		}, frame) :: Frame
+		Util.padding(descriptionHolder, 0, 0, 0, 11)
+		local description = Util.new("TextLabel", {
+			Name = "Description",
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1, -11, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Font = Enum.Font.Gotham,
+			Text = descriptionText,
+			TextColor3 = window._theme.MutedText,
+			TextSize = 11,
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top,
+		}, descriptionHolder) :: TextLabel
+		Util.bindTheme(window, description, "TextColor3", "MutedText")
+		self._description = description
+	end
 
 	local body = Util.new("Frame", {
 		Name = "Controls",
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 2,
+		LayoutOrder = 3,
 	}, frame)
 	self._body = body
 	Util.layout(body, Enum.FillDirection.Vertical, 8)

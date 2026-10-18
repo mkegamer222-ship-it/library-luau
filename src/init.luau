@@ -1,6 +1,6 @@
 --!strict
 
-export type ThemeInput = "Dark" | "Light" | "Midnight" | { [string]: any }
+export type ThemeInput = "Dark" | "Light" | "Midnight" | "Nord" | "Amoled" | { [string]: any }
 
 export type WindowOptions = {
 	Name: string?,
@@ -168,10 +168,54 @@ export type Window = {
 	Minimize: (self: Window, minimized: boolean?) -> (),
 	SetTheme: (self: Window, theme: ThemeInput) -> (),
 	Search: (self: Window, query: string?) -> (),
+	Console: (self: Window, options: ConsoleOptions?) -> Console?,
 	Notify: (self: Window, options: NotificationOptions | string) -> Frame?,
 	ExportConfig: (self: Window) -> (string?, string?),
 	ImportConfig: (self: Window, serialized: string, fireCallbacks: boolean?) -> (boolean, string?),
 	Destroy: (self: Window) -> (),
+}
+
+export type LoadstringOptions = {
+	ChunkName: string?,
+	Environment: { [string]: any }?,
+	Args: { any }?,
+	MaxInstructions: number?,
+	MaxDepth: number?,
+	UseHostCompiler: boolean?,
+}
+
+export type LoadstringResult = {
+	Success: boolean,
+	Values: { any },
+	Error: string?,
+}
+
+export type LoadstringApi = {
+	compile: (source: string, options: LoadstringOptions?) -> (any?, string?),
+	run: (source: string, options: LoadstringOptions?) -> (boolean, any, string?),
+	runValues: (source: string, options: LoadstringOptions?) -> (boolean, { any }, string?),
+	validate: (source: string, options: LoadstringOptions?) -> (boolean, string?),
+	sandbox: (overrides: { [string]: any }?) -> { [string]: any },
+	environment: () -> { [string]: any },
+	hasHostCompiler: () -> boolean,
+}
+
+export type ConsoleOptions = {
+	Title: string?,
+	Icon: string?,
+	Description: string?,
+	Placeholder: string?,
+	Sandbox: boolean?,
+	MaxInstructions: number?,
+}
+
+export type Console = {
+	Tab: Tab,
+	Editor: TextBox,
+	Output: ScrollingFrame,
+	Run: () -> (),
+	Clear: () -> (),
+	Log: (text: string, kind: string?) -> (),
 }
 
 export type LibraryApi = {
@@ -183,22 +227,32 @@ export type LibraryApi = {
 	Maid: any,
 	Signal: any,
 	Themes: { [string]: any },
+	Loadstring: LoadstringApi,
+	loadstring: (source: string, options: LoadstringOptions?) -> (boolean, any, string?),
+	loadstringValues: (source: string, options: LoadstringOptions?) -> (boolean, { any }, string?),
+	Console: (window: Window, options: ConsoleOptions?) -> Console?,
 }
 
 local WindowModule = require(script.UI.Window)
+local Console = require(script.UI.Console)
+local Loadstring = require(script.Core.Loadstring)
 local Maid = require(script.Core.Maid)
 local Signal = require(script.Core.Signal)
 local Theme = require(script.Core.Theme)
 
 local Library: LibraryApi = {
 	Name = "LumaUI",
-	Version = "1.0.0",
+	Version = WindowModule.Version,
 	new = WindowModule.new,
 	New = WindowModule.new,
 	CreateWindow = WindowModule.new,
 	Maid = Maid,
 	Signal = Signal,
 	Themes = Theme.Presets,
+	Loadstring = Loadstring,
+	loadstring = Loadstring.run,
+	loadstringValues = Loadstring.runValues,
+	Console = Console.new,
 }
 
 return Library

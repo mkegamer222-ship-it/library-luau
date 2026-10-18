@@ -62,6 +62,7 @@ local function makeSurface(parent: Instance, window: any, name: string, height: 
 	}, parent) :: Frame
 	Util.corner(surface, 8)
 	local outline = Util.stroke(surface, window._theme.Border, 1, 0.5)
+	outline.Name = "Outline"
 	Util.bindTheme(window, surface, "BackgroundColor3", "SurfaceAlt")
 	Util.bindTheme(window, outline, "Color", "Border")
 	return surface
@@ -70,6 +71,7 @@ end
 local function connectHover(control: any, button: GuiButton)
 	local window = control._window
 	local surface = control._surface or button
+	local outline = surface:FindFirstChildOfClass("UIStroke")
 	control._maid:GiveTask(button.MouseEnter:Connect(function()
 		if control._destroyed then
 			return
@@ -77,6 +79,12 @@ local function connectHover(control: any, button: GuiButton)
 		Util.tween(surface, window._animationDuration, {
 			BackgroundColor3 = window._theme.SurfaceRaised,
 		})
+		if outline then
+			Util.tween(outline, window._animationDuration, {
+				Color = window._theme.Accent,
+				Transparency = 0.3,
+			})
+		end
 	end))
 	control._maid:GiveTask(button.MouseLeave:Connect(function()
 		if control._destroyed then
@@ -85,6 +93,12 @@ local function connectHover(control: any, button: GuiButton)
 		Util.tween(surface, window._animationDuration, {
 			BackgroundColor3 = window._theme.SurfaceAlt,
 		})
+		if outline then
+			Util.tween(outline, window._animationDuration, {
+				Color = window._theme.Border,
+				Transparency = 0.5,
+			})
+		end
 	end))
 end
 
@@ -346,14 +360,25 @@ function Controls.Slider(section: any, rawOptions: any): any
 		Font = Enum.Font.GothamMedium,
 		TextSize = 13,
 	})
-	local valueLabel = makeText(root, window, "Value", "", {
+	local valueChip = Util.new("Frame", {
+		Name = "ValueChip",
 		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, -2, 0, 1),
-		Size = UDim2.new(0.35, 0, 0, 18),
-		Font = Enum.Font.GothamMedium,
+		Position = UDim2.new(1, -2, 0, 0),
+		Size = UDim2.fromOffset(54, 20),
+		AutomaticSize = Enum.AutomaticSize.X,
+		BackgroundColor3 = window._theme.AccentMuted,
+		BackgroundTransparency = 0.25,
+		BorderSizePixel = 0,
+	}, root) :: Frame
+	Util.corner(valueChip, 6)
+	Util.padding(valueChip, 0, 7, 0, 7)
+	Util.bindTheme(window, valueChip, "BackgroundColor3", "AccentMuted")
+	local valueLabel = makeText(valueChip, window, "Value", "", {
+		Size = UDim2.fromScale(1, 1),
+		Font = Enum.Font.GothamBold,
 		TextColor3 = window._theme.Accent,
-		TextSize = 12,
-		TextXAlignment = Enum.TextXAlignment.Right,
+		TextSize = 11,
+		TextXAlignment = Enum.TextXAlignment.Center,
 	})
 	Util.bindTheme(window, valueLabel, "TextColor3", "Accent")
 	local track = Util.new("Frame", {
@@ -371,9 +396,17 @@ function Controls.Slider(section: any, rawOptions: any): any
 		Size = UDim2.new(0, 0, 1, 0),
 		BackgroundColor3 = window._theme.Accent,
 		BorderSizePixel = 0,
+		ClipsDescendants = true,
 	}, track) :: Frame
 	Util.corner(fill, 4)
 	Util.bindTheme(window, fill, "BackgroundColor3", "Accent")
+	Util.new("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, window._theme.Accent),
+			ColorSequenceKeypoint.new(1, window._theme.AccentMuted),
+		}),
+		Rotation = 0,
+	}, fill)
 	local knob = Util.new("Frame", {
 		Name = "Knob",
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -649,10 +682,24 @@ function Controls.Dropdown(section: any, rawOptions: any): any
 				LayoutOrder = index,
 			}, menu) :: TextButton
 			Util.corner(optionButton, 6)
-			Util.padding(optionButton, 0, 9, 0, 9)
+			Util.padding(optionButton, 0, 26, 0, 9)
 			Util.bindTheme(window, optionButton, "TextColor3", "Text")
+			local check = Util.new("TextLabel", {
+				Name = "Check",
+				AnchorPoint = Vector2.new(1, 0.5),
+				Position = UDim2.new(1, -6, 0.5, 0),
+				Size = UDim2.fromOffset(16, 20),
+				BackgroundTransparency = 1,
+				Font = Enum.Font.GothamBold,
+				Text = "\u{2713}",
+				TextColor3 = window._theme.Accent,
+				TextSize = 11,
+				TextXAlignment = Enum.TextXAlignment.Center,
+			}, optionButton) :: TextLabel
+			Util.bindTheme(window, check, "TextColor3", "Accent")
 			local function updateOptionStyle()
 				optionButton.BackgroundColor3 = if isSelected(entry.Value) then window._theme.AccentMuted else window._theme.SurfaceAlt
+				check.Visible = isSelected(entry.Value)
 			end
 			updateOptionStyle()
 			control._optionMaid:GiveTask(optionButton.Activated:Connect(function()
@@ -711,6 +758,10 @@ function Controls.Dropdown(section: any, rawOptions: any): any
 				local entry = entries[tonumber(string.match(child.Name, "%d+")) or -1]
 				if entry then
 					child.BackgroundColor3 = if isSelected(entry.Value) then window._theme.AccentMuted else window._theme.SurfaceAlt
+					local check = child:FindFirstChild("Check")
+					if check then
+						check.Visible = isSelected(entry.Value)
+					end
 				end
 			end
 		end
@@ -802,7 +853,13 @@ function Controls.Textbox(section: any, rawOptions: any): any
 			field.Text = value
 		end
 	end
+	control._maid:GiveTask(field.Focused:Connect(function()
+		outline.Color = window._theme.Accent
+		outline.Transparency = 0.2
+	end))
 	control._maid:GiveTask(field.FocusLost:Connect(function(enterPressed: boolean)
+		outline.Color = window._theme.Border
+		outline.Transparency = 0.5
 		if options.SubmitOnEnter == true and not enterPressed then
 			return
 		end

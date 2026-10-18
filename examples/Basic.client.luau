@@ -127,9 +127,9 @@ local appearance = window:Tab({ Title = "Aparência", Icon = "03", Description =
 local appearanceSection = appearance:Section("Temas")
 appearanceSection:Dropdown({
 	Title = "Tema da interface",
-	Options = { "Dark", "Light", "Midnight" },
-	Default = "Midnight",
-	Callback = function(themeName: "Dark" | "Light" | "Midnight")
+	Options = { "Dark", "Light", "Midnight", "Nord", "Amoled" },
+	Default = "Dark",
+	Callback = function(themeName: "Dark" | "Light" | "Midnight" | "Nord" | "Amoled")
 		window:SetTheme(themeName)
 	end,
 })
@@ -185,6 +185,38 @@ configSection:Button({
 		else
 			window:Notify({ Title = "Sem configuração", Description = "Exporte uma configuração primeiro.", Type = "warning" })
 		end
+	end,
+})
+
+-- O console embutido usa a VM Luau da propria biblioteca.
+local console = window:Console({
+	Title = "Console",
+	Icon = ">_",
+	Description = "Execute snippets de Luau no cliente (Ctrl + Enter)",
+})
+
+-- O loadstring tambem pode ser usado diretamente, fora da interface.
+local scripting = window:Tab({ Title = "Scripts", Icon = "05", Description = "loadstring nativo da LumaUI" })
+local scriptingSection = scripting:Section({
+	Title = "Executar Luau",
+	Description = "A VM interna executa o codigo no cliente, sem depender do compilador do Roblox.",
+})
+scriptingSection:Button({
+	Title = "Executar exemplo",
+	Description = "Roda `return 21 * 2` e mostra o resultado.",
+	Callback = function()
+		local ok, value, errorMessage = LumaUI.loadstring("return 21 * 2")
+		if ok then
+			window:Notify({ Title = "Resultado", Description = tostring(value), Type = "success" })
+		else
+			window:Notify({ Title = "Erro", Description = tostring(errorMessage), Type = "error" })
+		end
+	end,
+})
+scriptingSection:Button({
+	Title = "Abrir o console",
+	Callback = function()
+		window:SelectTab(console.Tab)
 	end,
 })
 

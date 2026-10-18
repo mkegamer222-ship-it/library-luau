@@ -9,6 +9,7 @@ export type Theme = {
 	Border: Color3,
 	Accent: Color3,
 	AccentMuted: Color3,
+	AccentText: Color3,
 	Text: Color3,
 	MutedText: Color3,
 	SubtleText: Color3,
@@ -29,6 +30,7 @@ local dark: Theme = {
 	Border = Color3.fromRGB(46, 54, 70),
 	Accent = Color3.fromRGB(121, 112, 255),
 	AccentMuted = Color3.fromRGB(48, 45, 91),
+	AccentText = Color3.fromRGB(255, 255, 255),
 	Text = Color3.fromRGB(243, 245, 250),
 	MutedText = Color3.fromRGB(160, 168, 183),
 	SubtleText = Color3.fromRGB(112, 123, 144),
@@ -47,6 +49,7 @@ local light: Theme = {
 	Border = Color3.fromRGB(220, 223, 233),
 	Accent = Color3.fromRGB(102, 77, 225),
 	AccentMuted = Color3.fromRGB(227, 221, 255),
+	AccentText = Color3.fromRGB(255, 255, 255),
 	Text = Color3.fromRGB(34, 37, 49),
 	MutedText = Color3.fromRGB(97, 103, 121),
 	SubtleText = Color3.fromRGB(137, 143, 158),
@@ -65,6 +68,7 @@ local midnight: Theme = {
 	Border = Color3.fromRGB(39, 64, 93),
 	Accent = Color3.fromRGB(58, 195, 219),
 	AccentMuted = Color3.fromRGB(24, 79, 94),
+	AccentText = Color3.fromRGB(6, 20, 28),
 	Text = Color3.fromRGB(235, 246, 251),
 	MutedText = Color3.fromRGB(150, 177, 193),
 	SubtleText = Color3.fromRGB(102, 133, 153),
@@ -74,10 +78,50 @@ local midnight: Theme = {
 	Radius = 10,
 }
 
+local nord: Theme = {
+	Name = "Nord",
+	Background = Color3.fromRGB(46, 52, 64),
+	Surface = Color3.fromRGB(59, 66, 82),
+	SurfaceAlt = Color3.fromRGB(67, 76, 94),
+	SurfaceRaised = Color3.fromRGB(76, 86, 106),
+	Border = Color3.fromRGB(76, 86, 106),
+	Accent = Color3.fromRGB(136, 192, 208),
+	AccentMuted = Color3.fromRGB(66, 93, 104),
+	AccentText = Color3.fromRGB(46, 52, 64),
+	Text = Color3.fromRGB(236, 239, 244),
+	MutedText = Color3.fromRGB(170, 180, 194),
+	SubtleText = Color3.fromRGB(127, 138, 154),
+	Success = Color3.fromRGB(163, 190, 140),
+	Warning = Color3.fromRGB(235, 203, 139),
+	Danger = Color3.fromRGB(191, 97, 106),
+	Radius = 10,
+}
+
+local amoled: Theme = {
+	Name = "Amoled",
+	Background = Color3.fromRGB(0, 0, 0),
+	Surface = Color3.fromRGB(9, 9, 12),
+	SurfaceAlt = Color3.fromRGB(17, 17, 22),
+	SurfaceRaised = Color3.fromRGB(28, 28, 36),
+	Border = Color3.fromRGB(40, 40, 50),
+	Accent = Color3.fromRGB(0, 229, 255),
+	AccentMuted = Color3.fromRGB(0, 82, 98),
+	AccentText = Color3.fromRGB(4, 12, 16),
+	Text = Color3.fromRGB(245, 245, 250),
+	MutedText = Color3.fromRGB(158, 160, 170),
+	SubtleText = Color3.fromRGB(108, 110, 122),
+	Success = Color3.fromRGB(46, 213, 115),
+	Warning = Color3.fromRGB(255, 186, 73),
+	Danger = Color3.fromRGB(255, 99, 110),
+	Radius = 14,
+}
+
 Theme.Presets = table.freeze({
 	Dark = table.freeze(dark),
 	Light = table.freeze(light),
 	Midnight = table.freeze(midnight),
+	Nord = table.freeze(nord),
+	Amoled = table.freeze(amoled),
 })
 
 local colorKeys = {
@@ -88,6 +132,7 @@ local colorKeys = {
 	Border = true,
 	Accent = true,
 	AccentMuted = true,
+	AccentText = true,
 	Text = true,
 	MutedText = true,
 	SubtleText = true,
@@ -120,7 +165,7 @@ function Theme.resolve(input: any?): Theme
 
 	if type(input) == "string" then
 		local preset = Theme.Presets[input]
-		assert(preset ~= nil, ("Unknown theme '%s'. Use Dark, Light, Midnight, or a theme table."):format(input))
+		assert(preset ~= nil, ("Unknown theme '%s'. Use Dark, Light, Midnight, Nord, Amoled, or a theme table."):format(input))
 		return copyTheme(preset)
 	end
 
